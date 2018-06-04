@@ -1,0 +1,11 @@
+{
+  "name": "blog2.0-server",
+  "version": "2.0.0",
+  "description": "the server of Dawkey's blog",
+  "author": "Dawkey",
+  "dependencies": {
+    "mongoose": "^5.1.2",
+    "koa": "^2.5.1",
+    "koa-router": "^7.4.0"
+  }
+}
