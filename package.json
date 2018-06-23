@@ -6,6 +6,10 @@
   "dependencies": {
     "mongoose": "^5.1.2",
     "koa": "^2.5.1",
-    "koa-router": "^7.4.0"
+    "koa-router": "^7.4.0",
+    "koa-bodyparser": "^4.2.1"
+  },
+  "devDependencies": {
+    "debug": "^3.1.0"
   }
 }
