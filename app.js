@@ -22,11 +22,15 @@ const find_draft = find.find_draft;
 const find_draft_main = find.find_draft_main;
 
 const create_draft = create.create_draft;
+const create_article = create.create_article;
+const create_update = create.create_update;
 
 const update_use = update.update_use;
 const update_draft = update.update_draft;
+const update_article = update.update_article;
 
 const remove_draft = remove.remove_draft;
+const remove_article = remove.remove_article;
 
 
 function get_view(name){
@@ -63,6 +67,7 @@ home.get("/api/get/article",async (ctx,next)=>{
   let data = {};
 
   let _id = Number(ctx.query._id);//GET传入的_id是字符串类型
+  let type = ctx.query.type;
 
   if(!Number.isInteger(_id)){
     code = 2;
@@ -91,11 +96,18 @@ home.get("/api/get/article",async (ctx,next)=>{
       else if(value._id < _id){before_article = value;}
     });
 
-    //mongoose返回的对象是不能添加或者删减属性的,故这里我们不能直接把content
-    //作为article变量的新属性传给它.
-    let content = article_array[0].article;
+    if(type === "show"){
+      //mongoose返回的对象是不能添加或者删减属性的,故这里我们不能直接把content
+      //作为article变量的新属性传给它.
+      let content = article_array[0].article;
+      data = {before_article,article,after_article,content};
+    }else if(type === "edit"){
+      let markdown = article_array[0].markdown;
+      data = {article,markdown};
+    }else{
+      code = 1;
+    }
 
-    data = {before_article,article,after_article,content};
   }
   catch(err){
     code = 1;
@@ -108,6 +120,7 @@ home.get("/api/get/article",async (ctx,next)=>{
   });
   ctx.body = {code,data};
 });
+
 
 home.get("/api/get/draft_main",async (ctx,next)=>{
   let code = 0;
@@ -142,6 +155,8 @@ home.get("/api/get/draft",async (ctx,next)=>{
   await next();
   ctx.body = {code,data};
 });
+
+
 
 
 home.post("/api/post/create_draft",async (ctx,next)=>{
@@ -186,7 +201,6 @@ home.post("/api/post/update_draft",async (ctx,next)=>{
   ctx.body = {code,data};
 });
 
-
 home.post("/api/post/remove_draft",async (ctx,next)=>{
   let code = 0;
   let data = {};
@@ -211,7 +225,113 @@ home.post("/api/post/remove_draft",async (ctx,next)=>{
 
   await next();
   ctx.body = {code,data};
-})
+});
+
+
+
+home.post("/api/post/create_article",async (ctx,next)=>{
+  let code = 0;
+  let data = {};
+  let req_data = ctx.request.body;
+
+  try{
+    let main_data = req_data.main;
+    let article_data = req_data.article;
+    let article_id = article_data._id;
+
+    await create_article(main_data,article_data);
+    await update_use({article_id});
+    let res_array = await Promise.all([find_use(),find_view("main_model")]);
+    let use = res_array[0];
+    data.use = use[0];
+    data.view = res_array[1];
+  }
+  catch(err){
+    code = 1;
+    debug(err);
+  }
+
+  await next();
+  ctx.body = {code,data};
+});
+
+home.post("/api/post/update_article",async (ctx,next)=>{
+  let code = 0;
+  let data = {};
+  let req_data = ctx.request.body;
+
+  try{
+    let main_data = req_data.main;
+    let article_data = req_data.article;
+
+    await update_article(main_data,article_data);
+    let res_array = await Promise.all([find_use(),find_view("main_model")]);
+    let use = res_array[0];
+    data.use = use[0];
+    data.view = res_array[1];
+  }
+  catch(err){
+    code = 1;
+    debug(err);
+  }
+
+  await next();
+  ctx.body = {code,data};
+});
+
+home.post("/api/post/remove_article",async (ctx,next)=>{
+  let code = 0;
+  let data = {};
+  let req_data = ctx.request.body;
+
+  try{
+    let _id = req_data._id;
+    let article_id = req_data.article_id;
+    await remove_article({_id});
+    if(article_id != null){
+      await update_use({article_id});
+    }
+    let res_array = await Promise.all([find_use(),find_view("main_model")]);
+    let use = res_array[0];
+    data.use = use[0];
+    data.view = res_array[1];
+  }
+  catch(err){
+    code = 1;
+    debug(err);
+  }
+
+  await next();
+  ctx.body = {code,data};
+});
+
+
+
+home.post("/api/post/create_update",async (ctx,next)=>{
+  let code = 0;
+  let data = {};
+  let req_data = ctx.request.body;
+
+  try{
+    await create_update(req_data);
+    let update_id = req_data._id;
+    let update_version = req_data.version;
+    await update_use({update_id,update_version});
+    let res_array = await Promise.all([find_use(),find_view("update_model")]);
+    let use = res_array[0];
+    data.use = use[0];
+    data.update = res_array[1];
+  }
+  catch(err){
+    code = 1;
+    debug(err);
+  }
+
+  await next();
+  ctx.body = {code,data};
+});
+
+
 
 
 app.use(bodyparser());

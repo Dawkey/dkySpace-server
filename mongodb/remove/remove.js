@@ -10,6 +10,14 @@ function remove_draft(_id){
   return promise;
 }
 
+function remove_article(_id){
+  let main_model = models["main_model"];
+  let article_model = models["article_model"];
+  let promise = Promise.all([main_model.remove({_id}),article_model.remove({_id})]);
+  return promise;
+}
+
 module.exports = {
-  remove_draft
+  remove_draft,
+  remove_article
 }

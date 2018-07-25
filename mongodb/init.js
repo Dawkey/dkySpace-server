@@ -61,6 +61,7 @@ const update_schema = new mongoose.Schema(
     _id: {type: Number},
     version: {type: String},
     date: {type: String},
+    markdown: {type: String},
     content: {type: String}
   },
   {

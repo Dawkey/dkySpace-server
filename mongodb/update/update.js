@@ -9,6 +9,15 @@ function update_use(data){
   return promise;
 }
 
+function update_article(main_data,article_data){
+  let _id = main_data._id;
+  let main_model = models["main_model"];
+  let article_model = models["article_model"];
+  let promise = Promise.all([main_model.update({_id},{$set: main_data}),
+                             article_model.update({_id},{$set: article_data})]);
+  return promise;
+}
+
 function update_draft(_id,data){
   let model = models["draft_model"];
   let promise = model.update({_id},{$set: data});
@@ -17,5 +26,6 @@ function update_draft(_id,data){
 
 module.exports = {
   update_use,
-  update_draft
+  update_draft,
+  update_article
 }
