@@ -17,7 +17,14 @@ function remove_article(_id){
   return promise;
 }
 
+function remove_update(_id){
+  let model = models["update_model"];
+  let promise = model.remove({_id});
+  return promise;
+}
+
 module.exports = {
   remove_draft,
-  remove_article
+  remove_article,
+  remove_update,
 }

@@ -24,8 +24,15 @@ function update_draft(_id,data){
   return promise;
 }
 
+function update_update(_id,data){
+  let model = models["update_model"];
+  let promise = model.update({_id},{$set: data});
+  return promise;
+}
+
 module.exports = {
   update_use,
   update_draft,
-  update_article
+  update_article,
+  update_update
 }

@@ -9,6 +9,7 @@ function find_view(name){
   return promise;
 }
 
+
 function find_use(){
   let model = models["use_model"];
   let promise = model.find({},{__v: 0});
@@ -22,11 +23,10 @@ function find_article(_id){
   return promise;
 }
 
-function find_article_main(_id){
+function find_article_main(){
   let model = models["main_model"];
   let promise = model.find(
-    {_id: {$gte: _id-1 , $lte: _id+1}},
-    {__v: 0 , description: 0},
+    {},{__v: 0,description: 0},{sort: {_id: -1}}
   );
   return promise;
 }
