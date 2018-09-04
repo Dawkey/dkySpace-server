@@ -45,6 +45,12 @@ function find_draft_main(){
 }
 
 
+function find_login(){
+  let model = models["login_model"];
+  let promise = model.find({},{_v: 0});
+  return promise;
+}
+
 
 module.exports = {
   find_view,
@@ -52,5 +58,6 @@ module.exports = {
   find_article,
   find_article_main,
   find_draft,
-  find_draft_main
+  find_draft_main,
+  find_login
 };

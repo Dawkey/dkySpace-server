@@ -104,6 +104,19 @@ const use_schema = new mongoose.Schema(
 const use_model = mongoose.model("use_db",use_schema);
 
 
+const login_schema = new mongoose.Schema(
+  {
+    _id: {type: Number},
+    username: {type: String},
+    password: {type: String},
+    secret: {type: String},
+  },
+  {
+    collection: "login_db"
+  }
+)
+const login_model = mongoose.model("login_db",login_schema);
+
 
 module.exports = {
   main_model,
@@ -111,5 +124,6 @@ module.exports = {
   draft_model,
   update_model,
   diary_model,
-  use_model
+  use_model,
+  login_model
 };

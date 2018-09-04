@@ -22,8 +22,15 @@ function create_update(data){
   return promise;
 }
 
+function create_login(data){
+  let model = models["login_model"];
+  let promise = model.create(data);
+  return promise;
+}
+
 module.exports = {
   create_draft,
   create_article,
-  create_update
+  create_update,
+  create_login,
 }

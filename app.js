@@ -3,6 +3,8 @@ const debug = require("debug")("koa");
 const Koa = require("koa");
 const Router = require("koa-router");
 const bodyparser = require("koa-bodyparser");
+const jwt = require("koa-jwt");
+const jsonwebtoken = require("jsonwebtoken");
 
 const connect = require("./mongodb/connect.js");
 const find = require("./mongodb/find/find.js");
@@ -20,10 +22,12 @@ const find_article = find.find_article;
 const find_article_main = find.find_article_main;
 const find_draft = find.find_draft;
 const find_draft_main = find.find_draft_main;
+const find_login = find.find_login;
 
 const create_draft = create.create_draft;
 const create_article = create.create_article;
 const create_update = create.create_update;
+const create_login = create.create_login;
 
 const update_use = update.update_use;
 const update_draft = update.update_draft;
@@ -402,10 +406,118 @@ home.post("/api/post/remove_update",async (ctx,next)=>{
 
 
 
-app.use(bodyparser());
+home.post("/api/post/update_tag",async (ctx,next)=>{
+  let code = 0;
+  let data = {};
+  let req_data = ctx.request.body;
 
-app.use(home.routes());
+  try{
+    let tag = req_data.tag;
+    await update_use({tag});
+  }
+  catch(err){
+    code = 1;
+    debug(err);
+  }
 
-app.listen(3000,()=>{
-  console.log("listen : 3000");
+  await next();
+  ctx.body = {code,data};
+});
+
+home.post("/api/post/update_classify",async (ctx,next)=>{
+  let code = 0;
+  let data = {};
+  let req_data = ctx.request.body;
+
+  try{
+    let classify = req_data.classify;
+    await update_use({classify});
+  }
+  catch(err){
+    code = 1;
+    debug(err);
+  }
+
+  await next();
+  ctx.body = {code,data};
+});
+
+
+
+
+home.post("/api/post/register",async (ctx,next)=>{
+  let code = 0;
+  let req_data = ctx.request.body;
+
+  req_data._id = 0;
+
+  try{
+    await create_login(req_data);
+  }
+  catch(err){
+    code = 1;
+    debug(err);
+  }
+
+  await next();
+  ctx.body = {code};
+});
+
+
+home.post("/api/post/login",async (ctx,next)=>{
+  let code = 0;
+  let data = {};
+  let req_data = ctx.request.body;
+
+  try{
+    let array = await find_login();
+    let login = array[0];
+    if(req_data.username === login.username && req_data.password === login.password){
+      let token = jsonwebtoken.sign(
+        {
+          master: "dawkey",
+          exp: Math.floor(Date.now()/1000) + 60
+        },login.secret
+      );
+      data.token = token;
+    }else{
+      code = 2;
+    }
+  }
+  catch(err){
+    code = 1;
+    debug(err);
+  }
+
+  await next();
+  ctx.body = {code,data};
+});
+
+
+
+find_login().then((res)=>{
+  let secret = res[0].secret;
+  debug(secret);
+
+  app.use(function (ctx,next){
+    return next().catch((err)=>{
+      if(err.status === 401){
+        ctx.body = {
+          code: 3,
+          error: err.originalError ? err.originalError.message : err.message
+        };
+      }
+      else{
+        throw err;
+      }
+    });
+  });
+
+  app.use(bodyparser());
+  app.use(jwt({secret}));
+  app.use(home.routes());
+
+  app.listen(3000,()=>{
+    console.log("listen : 3000");
+  });
 });
