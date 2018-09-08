@@ -30,9 +30,16 @@ function update_update(_id,data){
   return promise;
 }
 
+function update_login(data){
+  let model = models["login_model"];
+  let promise = model.update({_id: 0},{$set: data});
+  return promise;
+}
+
 module.exports = {
   update_use,
   update_draft,
   update_article,
-  update_update
+  update_update,
+  update_login
 }

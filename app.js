@@ -5,6 +5,7 @@ const Router = require("koa-router");
 const bodyparser = require("koa-bodyparser");
 const jwt = require("koa-jwt");
 const jsonwebtoken = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const connect = require("./mongodb/connect.js");
 const find = require("./mongodb/find/find.js");
@@ -13,7 +14,9 @@ const update = require("./mongodb/update/update.js");
 const remove = require("./mongodb/remove/remove.js");
 
 const app = new Koa();
-const home = new Router();
+// const home = new Router();
+const onstage = new Router();
+const backstage = new Router();
 
 
 const find_view = find.find_view;
@@ -33,6 +36,7 @@ const update_use = update.update_use;
 const update_draft = update.update_draft;
 const update_article = update.update_article;
 const update_update = update.update_update;
+const update_login = update.update_login;
 
 const remove_draft = remove.remove_draft;
 const remove_article = remove.remove_article;
@@ -64,11 +68,11 @@ function get_view(name){
 connect();
 
 
-home.get("/api/get/main",get_view("main_model"));
-home.get("/api/get/update",get_view("update_model"));
-home.get("/api/get/diary",get_view("diary_model"));
+onstage.get("/api/get/main",get_view("main_model"));
+onstage.get("/api/get/update",get_view("update_model"));
+onstage.get("/api/get/diary",get_view("diary_model"));
 
-home.get("/api/get/article",async (ctx,next)=>{
+onstage.get("/api/get/article",async (ctx,next)=>{
   let code = 0;
   let data = {};
 
@@ -138,7 +142,7 @@ home.get("/api/get/article",async (ctx,next)=>{
 });
 
 
-home.get("/api/get/draft_main",async (ctx,next)=>{
+onstage.get("/api/get/draft_main",async (ctx,next)=>{
   let code = 0;
   let data = {};
 
@@ -154,7 +158,7 @@ home.get("/api/get/draft_main",async (ctx,next)=>{
   ctx.body = {code,data};
 });
 
-home.get("/api/get/draft",async (ctx,next)=>{
+onstage.get("/api/get/draft",async (ctx,next)=>{
   let code = 0;
   let data = {};
 
@@ -186,7 +190,7 @@ home.get("/api/get/draft",async (ctx,next)=>{
 
 
 
-home.post("/api/post/create_draft",async (ctx,next)=>{
+backstage.post("/api/post/create_draft",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -209,7 +213,7 @@ home.post("/api/post/create_draft",async (ctx,next)=>{
   ctx.body = {code,data};
 });
 
-home.post("/api/post/update_draft",async (ctx,next)=>{
+backstage.post("/api/post/update_draft",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -228,7 +232,7 @@ home.post("/api/post/update_draft",async (ctx,next)=>{
   ctx.body = {code,data};
 });
 
-home.post("/api/post/remove_draft",async (ctx,next)=>{
+backstage.post("/api/post/remove_draft",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -256,7 +260,7 @@ home.post("/api/post/remove_draft",async (ctx,next)=>{
 
 
 
-home.post("/api/post/create_article",async (ctx,next)=>{
+backstage.post("/api/post/create_article",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -282,7 +286,7 @@ home.post("/api/post/create_article",async (ctx,next)=>{
   ctx.body = {code,data};
 });
 
-home.post("/api/post/update_article",async (ctx,next)=>{
+backstage.post("/api/post/update_article",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -306,7 +310,7 @@ home.post("/api/post/update_article",async (ctx,next)=>{
   ctx.body = {code,data};
 });
 
-home.post("/api/post/remove_article",async (ctx,next)=>{
+backstage.post("/api/post/remove_article",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -334,7 +338,7 @@ home.post("/api/post/remove_article",async (ctx,next)=>{
 
 
 
-home.post("/api/post/create_update",async (ctx,next)=>{
+backstage.post("/api/post/create_update",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -358,7 +362,7 @@ home.post("/api/post/create_update",async (ctx,next)=>{
   ctx.body = {code,data};
 });
 
-home.post("/api/post/update_update",async (ctx,next)=>{
+backstage.post("/api/post/update_update",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -377,7 +381,7 @@ home.post("/api/post/update_update",async (ctx,next)=>{
   ctx.body = {code,data};
 })
 
-home.post("/api/post/remove_update",async (ctx,next)=>{
+backstage.post("/api/post/remove_update",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -406,7 +410,7 @@ home.post("/api/post/remove_update",async (ctx,next)=>{
 
 
 
-home.post("/api/post/update_tag",async (ctx,next)=>{
+backstage.post("/api/post/update_tag",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -424,7 +428,7 @@ home.post("/api/post/update_tag",async (ctx,next)=>{
   ctx.body = {code,data};
 });
 
-home.post("/api/post/update_classify",async (ctx,next)=>{
+backstage.post("/api/post/update_classify",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -445,26 +449,36 @@ home.post("/api/post/update_classify",async (ctx,next)=>{
 
 
 
-home.post("/api/post/register",async (ctx,next)=>{
-  let code = 0;
-  let req_data = ctx.request.body;
+// onstage.post("/api/post/register",async (ctx,next)=>{
+//   let code = 0;
+//   let req_data = ctx.request.body;
+//
+//   let password = req_data.password;
+//
+//   let salt = bcrypt.genSaltSync(10);
+//   let hash = bcrypt.hashSync(password,salt);
+//   req_data._id = 0;
+//   req_data.password = hash;
+//
+//   try{
+//     let array = await find_login();
+//     if(array.length === 0){
+//       await create_login(req_data);
+//     }else{
+//       await update_login(req_data);
+//     }
+//   }
+//   catch(err){
+//     code = 1;
+//     debug(err);
+//   }
+//
+//   await next();
+//   ctx.body = {code};
+// });
 
-  req_data._id = 0;
 
-  try{
-    await create_login(req_data);
-  }
-  catch(err){
-    code = 1;
-    debug(err);
-  }
-
-  await next();
-  ctx.body = {code};
-});
-
-
-home.post("/api/post/login",async (ctx,next)=>{
+onstage.post("/api/post/login",async (ctx,next)=>{
   let code = 0;
   let data = {};
   let req_data = ctx.request.body;
@@ -472,11 +486,12 @@ home.post("/api/post/login",async (ctx,next)=>{
   try{
     let array = await find_login();
     let login = array[0];
-    if(req_data.username === login.username && req_data.password === login.password){
+    if(req_data.username === login.username
+      && bcrypt.compareSync(req_data.password,login.password)){
       let token = jsonwebtoken.sign(
         {
           master: "dawkey",
-          exp: Math.floor(Date.now()/1000) + 60
+          exp: Math.floor(Date.now()/1000) + 3600 * 24 * 15
         },login.secret
       );
       data.token = token;
@@ -494,17 +509,23 @@ home.post("/api/post/login",async (ctx,next)=>{
 });
 
 
+onstage.post("/api/post/check_token",async (ctx,next)=>{
+  let code = 0;
+  let data = {};
+  await next();
+  ctx.body = {code,data};
+});
+
 
 find_login().then((res)=>{
   let secret = res[0].secret;
-  debug(secret);
 
   app.use(function (ctx,next){
     return next().catch((err)=>{
       if(err.status === 401){
         ctx.body = {
           code: 3,
-          error: err.originalError ? err.originalError.message : err.message
+          data: {error: err.originalError ? err.originalError.message : err.message}
         };
       }
       else{
@@ -513,9 +534,14 @@ find_login().then((res)=>{
     });
   });
 
+  app.use(jwt({secret}).unless({path: [/^\/api\/get/,/^\/api\/post\/login/]}));
+
   app.use(bodyparser());
-  app.use(jwt({secret}));
-  app.use(home.routes());
+
+  app.use(onstage.routes());
+
+  app.use(backstage.routes());
+
 
   app.listen(3000,()=>{
     console.log("listen : 3000");
