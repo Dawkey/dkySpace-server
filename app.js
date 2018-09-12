@@ -6,6 +6,10 @@ const bodyparser = require("koa-bodyparser");
 const jwt = require("koa-jwt");
 const jsonwebtoken = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const path = require("path");
+const serve = require("koa-static");
+const fallback = require("koa2-history-api-fallback");
+const compress = require("koa-compress");
 
 const connect = require("./mongodb/connect.js");
 const find = require("./mongodb/find/find.js");
@@ -14,7 +18,6 @@ const update = require("./mongodb/update/update.js");
 const remove = require("./mongodb/remove/remove.js");
 
 const app = new Koa();
-// const home = new Router();
 const onstage = new Router();
 const backstage = new Router();
 
@@ -519,6 +522,12 @@ onstage.post("/api/post/check_token",async (ctx,next)=>{
 
 find_login().then((res)=>{
   let secret = res[0].secret;
+
+  app.use(compress({threshold: 2048}));
+
+  app.use(fallback());
+
+  app.use(serve(path.resolve("dist")));
 
   app.use(function (ctx,next){
     return next().catch((err)=>{
